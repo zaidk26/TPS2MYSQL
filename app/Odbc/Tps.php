@@ -28,6 +28,30 @@ class Tps{
     }
   }
 
+    /**
+   * Get a collection of result of read query
+   */
+  public function readSchema($query){
+
+    $this->canConnect(1);
+    $this->connect(); 
+
+    try{
+
+      $result = odbc_exec($this->connection,$query);  
+
+      for ($i = 1; $i <= odbc_num_fields($result); $i++) {
+          $fieldTypes[] = array(odbc_field_name($result, $i) => odbc_field_type($result, $i));
+      }    
+         
+    }catch(\Exception $ex){    
+      throw new \Exception($ex); 
+    }finally{
+      $this->close();
+      return $fieldTypes;      
+    }
+  }
+
   /**
    * Check if connection can be made
    * Limit to 1 connections at a given time
