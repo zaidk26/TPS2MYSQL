@@ -10,7 +10,7 @@ class Tps{
   /**
    * Get a collection of result of read query
    */
-  public function read($query,$from=0,$take=100000){
+  public function read($query,$from=0,$take=10000000){
 
     $this->canConnect(1);
 
@@ -35,21 +35,25 @@ class Tps{
 
     $this->canConnect(1);
     $this->connect(); 
-
-    try{
+    
 
       $result = odbc_exec($this->connection,$query);  
+      $numFields = odbc_num_fields($result);
 
-      for ($i = 1; $i <= odbc_num_fields($result); $i++) {
-          $fieldTypes[] = array(odbc_field_name($result, $i) => odbc_field_type($result, $i));
-      }    
+      $fieldTypes = [];
+
+      if($numFields > 0 ){
+
+        for ($i = 1; $i <= $numFields ; $i++) {
+            $fieldTypes[] = array(odbc_field_name($result, $i) => odbc_field_type($result, $i));
+        }    
+    
+      }
          
-    }catch(\Exception $ex){    
-      throw new \Exception($ex); 
-    }finally{
+    
       $this->close();
       return $fieldTypes;      
-    }
+    
   }
 
   /**
@@ -114,8 +118,10 @@ class Tps{
     
       if($i >= $from  && $i < ($from + $take)){
         
-        for ($j = 0;$j < $numFields; $j++) {       
-          $arr[strtolower($fieldNames[$j])] = utf8_encode($row[$fieldNames[$j]]);
+        for ($j = 0;$j < $numFields; $j++) {   
+          $value = utf8_encode($row[$fieldNames[$j]]);    
+          if($value == ''){ $value = NULL;}
+          $arr[strtolower(str_replace('$', '_', $fieldNames[$j]))] = $value;
         }
 
         $collection->push($arr);

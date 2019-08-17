@@ -4,49 +4,107 @@ use App\Odbc\Tps;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-Route::get('/', function () {
+$tablesList = array(
+    // "Stock_Movement_Header",
+    // "Stock_Movement_Line",
+    // "Stock_Movement_Serial",
+    // "Stock_Take_Header",
+    // "Stock_Take_Line",
+    // "Stock_Take_Serial",
+    // "Supplier_Credits",
+    // "Symptoms",
+    // "System_Parameters",
+    // "Vision_Logs",
+    // "Actions",
+    // "API_Pre_Bookings",
+    // "Claims_Log",
+    // "Control",
+    // "Customer_Branches",
+    // "Customer_Comments",
+    // "Customer_Walkin",
+    // "Customers",
+    // "DOA_Log",
+    // "Exchange_Rates",
+    // "Fault_Actions",
+    // "Faults",
+    // "Interfaces",
+    // "Job_Accessories",
+    // "Job_Accessories_Temp",
+    // "Job_Action",
+    "Job_Action_History",
+    "Job_Comments",
+    "Job_Comments_History",
+    "Job_Control",
+    "Job_Control_History",
+    "Job_Log",
+    "Job_Log_History",
+    "Job_Photos",
+    "Job_Scrapped_Devices",
+    "Job_Shipping",
+    "Job_Shipping_History",
+    "Job_Spares",
+    "Job_Spares_History",
+    "Make_Model_Accessories",
+    "Make_Models",
+    "Make_Technician",
+    "Makes",
+    "Manifest_Header",
+    "Manifest_Lines",
+    "Model_Parts",
+    "MTN_Jobs",
+    "MTN_Logs",
+    "Parts",
+    "Parts_Serial_Tracking",
+    "Payment_Types",
+    "PostNet_Customers",
+    "Pre_Bookings",
+    "Requisition_Header",
+    "Requisition_Line",
+    "SMS_Log",
+    "Status_Location",
+);
+
+
+//Build Tables
+Route::get('/build', function () use($tablesList) {
 
     $tps = new TPS;
-
-    //Only Change This///////////
-    //List of tables to convert//
-    /////////////////////////////
-    $tablesList = array(
-        'Api_Pre_Bookings',
-        'Parts',
-        'Job_Control',
-        //'Actions',
-    );
-
+    
     foreach ($tablesList as $table) {
 
-        CreateTable($tps->readSchema("SELECT * FROM " . $table), $table);
-
-        $tableData = $tps->read("SELECT * FROM " . $table);
-
-        foreach ($tableData as $row) { //rows
-
-            foreach ($row as $column => $value) { //columns
-
-            }
-        }
+        CreateTable($tps->readSchema("SELECT * FROM {$table} "), $table);
 
     }
 
 });
+
+
+//Write Data to Tables
+Route::get('/write', function () use($tablesList) {
+
+    $tps = new TPS;
+
+    foreach ($tablesList as $table) {
+
+        $rows = $tps->read("SELECT * FROM " . $table);
+       
+        DB::table(strtolower($table))->truncate();
+
+        foreach($rows as $row){
+            DB::table(strtolower($table))->insert($row);
+        }
+
+       
+    }    
+
+});
+
 
 /**
  * Create table schema
  */
 function CreateTable($fieldTypesArr, $tableName)
 {
-
-    // foreach ($fieldTypesArr as $field) {
-    //     foreach ($field as $name => $type) {
-    //         echo $name . ' - ' . $type . '<br>';
-    //     }
-    // }
-
     // $ replaces with _
     // table names, field names lowercased
     // id and timestamsp fields added
@@ -60,7 +118,7 @@ function CreateTable($fieldTypesArr, $tableName)
 
         foreach ($fieldTypesArr as $field) {
             foreach ($field as $name => $type) {
-                FieldBuilder($table, $type, strtolower(str_replace('$', '_', $name)));
+                FieldBuilder($table, $type, strtolower(str_replace('$', '_', $name)))->nullable();
             }
         }
 
@@ -96,7 +154,8 @@ function FieldBuilder($table, $type, $name)
             return $table->text($name);
             break;
         default:
-            return $table->text($name);
+        dd("TYPE NOT MAPPED , PLEASE MAP IN FIELD BUILDER FUNCTION " .$type);
+           // return $table->text($name);
 
     }
 
