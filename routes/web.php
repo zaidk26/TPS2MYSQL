@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 $tablesList = array(
 
-    "Menu_Options",
-    "Company",
-    "User_Options",
-    "Users",
+    // "Menu_Options",
+    // "Company",
+    // "User_Options",
+    // "Users",
     // "Stock_Movement_Header",
     // "Stock_Movement_Line",
     // "Stock_Movement_Serial",
@@ -39,7 +39,7 @@ $tablesList = array(
     // "Job_Action_History",
     // "Job_Comments",
     // "Job_Comments_History",
-   // "Job_Control",
+    "Job_Control",
     //"Job_Control_History",
     // "Job_Log",
      //"Job_Log_History",
